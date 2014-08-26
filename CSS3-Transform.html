@@ -7,8 +7,11 @@
       *{
         margin:0;padding:0;
 		box-sizing:border-box;
- 
       }
+	  body{
+		overflow:hidden;
+		font-size:12px;
+	  }
       /*舞台*/
       .stage_area{
         transform-style: preserve-3d;
@@ -18,7 +21,7 @@
 		background:rgba(164, 219, 201, 0.3);
       }
 	  
-	  .stage_area:after{
+	  .stage_area:before,.container:before,.h:before{
 	    content:'';
 		display:block;
 		width:6px;
@@ -30,14 +33,18 @@
 		left:50%;
 		transform:translate(-50%,-50%);
 	  }
-	  .stage_area:before{
-	    content:'';
-		display:block;
-		width:6px;
-		height:6px;
-		position:absolute;
-		background:red;
-		border-radius:50%;
+	  .stage_area:after{
+		content: 'Z';
+		display: block;
+		height: 30%;
+		width: 20%;
+		transform: rotateX(90deg);
+        background:rgba(0, 21, 239, 0.3);
+		position: absolute;
+		text-align:center;
+		line-height:8;
+		font-size:40px;
+		font-weight:bold;
 		top:50%;
 		left:50%;
 		transform:translate(-50%,-50%) rotateX(90deg);
@@ -49,12 +56,13 @@
         transform-style: preserve-3d;
         width:200px;
         height:200px;
-        background:rgba(240,240,0,0.3);
+        background:rgba(200, 255, 0, 0.3);
         position:absolute;
         top:50%;
         left:50%;
         margin-left:-100px;margin-top:-100px;
       }
+
 	  
       .container a{
 	 
@@ -74,13 +82,14 @@
 	  
 	  
 	.container ,.stage_area,pre,#log{-webkit-user-select: none;}
-	.help{overflow:hidden;width: 35%;top: 150px;position:absolute;z-index:2;background:#fff; top:60px;padding:10px;}
+	.help{overflow:hidden;width: 40%;top: 150px;position:absolute;z-index:2;top:60px;padding:10px;}
 	 pre{float:left;margin-right: 20px;font-size:20px;padding-bottom: 137px;}
 	 .btn{width: 45%;height: 40px;margin: 10px 0;}
     </style>
     
   </head>
   <body>
+  <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:red;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
   <div class="help">
   <pre>
   
@@ -129,6 +138,8 @@
 		objName,
 		rotateX=0,
 		rotateY=0,
+		translateX=0,
+		translateY=0,
 		translateZ=0,
 		oldX, //记录鼠标操作
 		oldY;
@@ -148,7 +159,7 @@
 	
 	//变形
 	function trsf(o){
-		obj.style.webkitTransform  = 'rotateX('+rotateX+'deg) rotateY('+rotateY+'deg) translateZ('+translateZ+'px)';
+		obj.style.webkitTransform  = 'rotateX('+rotateX+'deg) rotateY('+rotateY+'deg) translateZ('+translateZ+'px) translateY('+translateY+'px) translateX('+translateX+'px)';
 
 		obj.getElementsByTagName('span')[0].innerHTML = 'rotateX('+ rotateX +'deg) rotateY('+ rotateY +'deg) translateZ('+ translateZ +'px)';
 		$("log").innerHTML = '你选择的是'+ objName +'<br/>'+'rotateX('+rotateX+'deg)<br/> rotateY('+rotateY+'deg)<br/> translateZ('+translateZ+'px)';
@@ -205,6 +216,21 @@
 						oldX = newX;	 
 						oldY = newY;
 						
+						trsf();
+					} else {
+						oldX = newX;	 
+						oldY = newY;
+					}
+				},mouseRightMoveCallBack:function(target,e){
+					console.log('mouseRightMoveCallBack');
+					var newX = e.screenX,newY = e.screenY;
+					if( oldX && oldY){
+						translateX = (+translateX + (newX-oldX));
+						translateY = (+translateY -(+newY-oldY));
+						console.log('translateY'+translateY);
+						console.log(translateX);
+						oldX = newX;	 
+						oldY = newY;
 						trsf();
 					} else {
 						oldX = newX;	 
@@ -328,6 +354,8 @@
 		var mouseDownCallBack = opts.mouseDownCallBack || function(){};
 		var mouseUpCallBack = opts.mouseUpCallBack || function(){};
 		var mouseMoveCallBack = opts.mouseMoveCallBack || function(target,e){};
+		var mouseRightMoveCallBack = opts.mouseRightMoveCallBack || function(target,e){};
+		
 		var _target = ele;
 		var keyList = {};
 		
@@ -376,9 +404,20 @@
 
 		function mouseMove(e){
 			keyList['mouseMove'] = true;
-			console.log(e);
-			console.log('触发mousemove事件');
-			mouseMoveCallBack.call(null,_target,e);
+			console.log(e.which);
+			switch(e.which){
+				case 3:
+					console.log('右键');
+					mouseRightMoveCallBack.call(null,_target,e);	
+				break;
+				case 1:
+					console.log('左键');
+					console.log('触发mousemove事件');
+					mouseMoveCallBack.call(null,_target,e);					
+				break;
+			}
+
+
 		}
 
 		function clearEvent(){
