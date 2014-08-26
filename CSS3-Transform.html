@@ -1,0 +1,562 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>HTML5 canvas demo</title>
+	<style>
+      *{
+        margin:0;padding:0;
+		box-sizing:border-box;
+ 
+      }
+      /*舞台*/
+      .stage_area{
+        transform-style: preserve-3d;
+        position:relative;
+        height:100vh;
+        width:100vw;
+		background:rgba(164, 219, 201, 0.3);
+      }
+	  
+	  .stage_area:after{
+	    content:'';
+		display:block;
+		width:6px;
+		height:6px;
+		position:absolute;
+		background:red;
+		border-radius:50%;
+		top:50%;
+		left:50%;
+		transform:translate(-50%,-50%);
+	  }
+	  .stage_area:before{
+	    content:'';
+		display:block;
+		width:6px;
+		height:6px;
+		position:absolute;
+		background:red;
+		border-radius:50%;
+		top:50%;
+		left:50%;
+		transform:translate(-50%,-50%) rotateX(90deg);
+	  }
+      
+      /*外层容器居中*/
+      .container{
+		font-size:9px;
+        transform-style: preserve-3d;
+        width:200px;
+        height:200px;
+        background:rgba(240,240,0,0.3);
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin-left:-100px;margin-top:-100px;
+      }
+	  
+      .container a{
+	 
+		transform-style: preserve-3d;
+        width:50px;height:50px;
+        display:block;
+        width:100px;height:100px;
+        position:absolute;
+        background:rgba(240,0,0,0.3);
+        top:50%;
+        left:50%;
+        margin-left:-50px;
+        margin-top:-50px;
+      }
+	  
+	  
+	  
+	  
+	.container ,.stage_area,pre,#log{-webkit-user-select: none;}
+	.help{overflow:hidden;width: 35%;top: 150px;position:absolute;z-index:2;background:#fff; top:60px;padding:10px;}
+	 pre{float:left;margin-right: 20px;font-size:20px;padding-bottom: 137px;}
+	 .btn{width: 45%;height: 40px;margin: 10px 0;}
+    </style>
+    
+  </head>
+  <body>
+  <div class="help">
+  <pre>
+  
+点击选中需要改变的DIV
+
+键盘事件:
+	w:左转
+	s:右转
+	a:上转
+	d:下转
+	q:透视-
+	e:透视+
+	
+按住Ctrl键时：
+鼠标拖动修改位置
+鼠标滚轮可修改层级
+
+  </pre>
+  <div>X轴旋转:<input type="range" name="range" id="rangeX" min="0" step="10" max="360" value="0" /><label for='rangexCheck'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangexCheck" type='checkbox' /><button onclick="rotateX=0;trsf();">重置</button></div>
+  <div>Y轴旋转:<input type="range" name="range" id="rangeY" min="0" step="10" max="360" value="0" /><label for='rangeyCheck'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangeyCheck" type='checkbox' /><button onclick="rotateY=0;trsf();">重置</button></div>
+  <div>Z轴位移:<input type="range" name="range" id="rangeZ" min="-800" max="800" step="10" value="200" /></div>
+  <!--div>舞台透视:<input type="range" name="range" id="perspective" min="0" max="800" step="10" value="800" /></div-->
+  <button onclick="add();" class="btn">加一个</button>
+  <button onclick="addBall();" class="btn">加个球</button>
+  <button onclick="addCube();" class="btn">加个正方体</button>
+  
+  <button onclick="clearContainer();" class="btn">清空</button>
+  
+  <div id="log"></div>
+  </div>
+  <!--矩阵变换好麻烦啊，还是写在style里面吧-->
+    <div id="stage_area" class="stage_area"  style="perspective: 800px;-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>舞台X:0 rotateY:0 translateZ:0</span>
+    	<div id="container" class="container"   style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>容器 rotateX:0 rotateY:0 translateZ:0</span>
+		  <a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>
+    	</div>	 
+    </div>
+	<script>
+
+
+	function $(id){
+		return document.getElementById(id);
+	}
+
+	
+	var obj=$('h'),
+		objName,
+		rotateX=0,
+		rotateY=0,
+		translateZ=0,
+		oldX, //记录鼠标操作
+		oldY;
+	
+	$('rangeX').addEventListener("change", function() {
+		rotateX = this.value;
+		trsf(this);
+	});
+	$('rangeY').addEventListener("change", function() {
+		rotateY = this.value;
+		trsf(this);
+	});
+	$('rangeZ').addEventListener("change", function() {
+		translateZ = this.value;
+		trsf(this);
+	});
+	
+	//变形
+	function trsf(o){
+		obj.style.webkitTransform  = 'rotateX('+rotateX+'deg) rotateY('+rotateY+'deg) translateZ('+translateZ+'px)';
+
+		obj.getElementsByTagName('span')[0].innerHTML = 'rotateX('+ rotateX +'deg) rotateY('+ rotateY +'deg) translateZ('+ translateZ +'px)';
+		$("log").innerHTML = '你选择的是'+ objName +'<br/>'+'rotateX('+rotateX+'deg)<br/> rotateY('+rotateY+'deg)<br/> translateZ('+translateZ+'px)';
+		if(o){
+			console.log(o.value);
+			console.log(o.max);
+			 if(o.value==o.max){
+				o.value = o.min;
+			 } else if(o.value==o.min){
+				o.value= o.max;
+			 }
+		}		
+	}
+		
+	document.body.addEventListener('mousedown',function(e){
+		var cls = e.target.className;
+		var clsStr = {'stage_area':'舞台','container':'容器','h':'内容'};
+		if('stage_area container h v'.indexOf(cls) > -1 && cls!=''){
+		 
+	        obj && delWheelEvent( document,'mousewheel',changeStyle);//删除滚轮事件
+			obj = e.target;
+			addWheelEvent( document,'mousewheel',changeStyle);//绑定滚轮事件
+			objName = clsStr[cls];
+			$('log').innerHTML = '你选择的是'+objName;
+			$('rangeX').focus();
+			
+			for(var i in clsStr){
+				$(i).style.border='none';
+			}
+			obj.style.border="1px solid black";
+			
+			var trsVal = obj.style.webkitTransform;
+			trsVal = trsVal.match(/\-?[0-9]+/g);
+			console.log(trsVal);
+			$('rangeX').value = rotateX = trsVal[0];
+			$('rangeY').value = rotateY = trsVal[1];
+			$('rangeZ').value = translateZ = trsVal[2];
+			
+			
+			//鼠标操作
+			oldX = null,oldY = null;
+			console.log(rotateX);console.log(rotateY);console.log(translateZ);
+			console.log(oldX);console.log(oldY);
+			createMouseWorkSpace(obj,{
+				mouseMoveCallBack:function(target,e){
+					var newX = e.screenX,newY = e.screenY;
+					if( oldX && oldY){
+						rotateY = +rotateY + +newX-oldX;
+						rotateX = +rotateX -(+newY-oldY);
+						if(rotateY>360){ rotateY = 0;} 	
+						if(rotateY<0){rotateY = 360;} 	
+						if(rotateX>360){rotateX = 0;} 	
+						if(rotateX<0){rotateX = 360;} 	
+						oldX = newX;	 
+						oldY = newY;
+						
+						trsf();
+					} else {
+						oldX = newX;	 
+						oldY = newY;
+					}
+				}
+			});
+			
+		}
+	});
+	
+	document.body.addEventListener('mouseover',function(e){
+		if(e.target.type == 'range'){
+			e.target.focus();
+		}
+	});
+	
+	
+	//键盘操作
+	document.addEventListener('keydown',function(e){
+		/*
+			87  'w'  上     rotateX+
+			83  's'  下     rotateX-
+			65  'a'  左     rotateY-
+			68  'd'  右     rotateY+
+			 
+			81  'q'  透视-  translateZ-
+			69  'e'  透视+  translateZ+
+		*/
+		switch(e.keyCode){
+			case 87:
+				rotateX = + rotateX + 1;
+				$('rangeX').value=rotateX;
+				trsf($('rangeX'));
+				if(rotateX==$('rangeX').max){
+					rotateX = $('rangeX').min;
+				} else if(rotateX==$('rangeX').min){
+					rotateX= $('rangeX').max;
+				}
+			break;
+			case 83:
+				rotateX = + rotateX - 1;
+				$('rangeX').value=rotateX;
+				trsf($('rangeX'));
+				if(rotateX==$('rangeX').max){
+					rotateX = $('rangeX').min;
+				} else if(rotateX==$('rangeX').min){
+					rotateX= $('rangeX').max;
+				}
+			break;
+			case 65:
+				rotateY = + rotateY - 1;
+				$('rangeY').value=rotateY;
+				trsf($('rangeY'));
+				if(rotateY==$('rangeY').max){
+					rotateY = $('rangeY').min;
+				} else if(rotateY==$('rangeY').min){
+					rotateY = $('rangeY').max;
+				}
+			break;
+			case 68:
+				rotateY = + rotateY + 1;
+				$('rangeY').value=rotateY;
+				trsf($('rangeY'));
+				if(rotateY==$('rangeY').max){
+					rotateY = $('rangeY').min;
+				} else if(rotateY==$('rangeX').min){
+					rotateY= $('rangeY').max;
+				}
+			break;
+			case 81:
+				translateZ = + translateZ - 10;
+				$('rangeZ').value=translateZ;
+				trsf($('rangeZ'));
+				if(translateZ==$('rangeZ').max){
+					translateZ = $('rangeZ').min;
+				} else if(rotateY==$('rangeZ').min){
+					translateZ = $('rangeZ').max;
+				}
+			break;
+			case 69:
+				translateZ = + translateZ + 10;
+				$('rangeZ').value=translateZ;
+				trsf($('rangeZ'));
+				if(translateZ==$('rangeZ').max){
+					translateZ = $('rangeZ').min;
+				} else if(rotateX==$('rangeZ').min){
+					translateZ = $('rangeZ').max;
+				}
+			break;
+		}
+	
+	})
+	
+	
+
+ 
+	
+	//创建一个工作区 按下 Ctrl 后的鼠标操作
+	/*
+	@param: ele  DOM对象
+	@param: opts 回调配置
+			ctrlKeyDownCallBack  Ctrl 键按下 时回调
+			keyUpCallBack        Ctrl 键抬起 时回调
+			mouseDownCallBack    鼠标 按下   时回调
+			mouseUpCallBack      鼠标 抬起   时回调
+			mouseMoveCallBack    鼠标 移动   时回调
+			
+	使用:
+		var obj = document.getElementById('');
+		createMouseWorkSpace(obj,{
+			mouseMoveCallBack:function(target,e){
+				var newX = e.screenX,newY = e.screenY,changeX,changeY;
+				//鼠标移动时
+			}
+		});
+	*/
+	function createMouseWorkSpace(ele,opts){
+		var ctrlKeyDownCallBack = opts.ctrlKeyDownCallBack || function(){};
+		var keyUpCallBack = opts.keyUpCallBack || function(){};
+		var mouseDownCallBack = opts.mouseDownCallBack || function(){};
+		var mouseUpCallBack = opts.mouseUpCallBack || function(){};
+		var mouseMoveCallBack = opts.mouseMoveCallBack || function(target,e){};
+		var _target = ele;
+		var keyList = {};
+		
+		document.body.addEventListener('keydown', keyDown, false);
+		
+		function keyDown(e){
+			if(e.keyCode == 17){
+				if(keyList['Ctrl']){
+					return;
+				} else {
+					keyList['Ctrl'] = true;
+					console.log('按下Ctrl绑定mousedown事件');
+					document.body.addEventListener('mousedown', mouseDown, false);
+					document.body.addEventListener('keyup', keyUp, false);
+					ctrlKeyDownCallBack.call(null,_target,e);
+				}
+			}
+		}
+
+		function mouseDown(e){		
+			if(e.target == _target){
+				keyList['mouseDown'] = true;
+				console.log('触发mouseDown事件开始绑定mouseMove事件');
+				document.body.addEventListener('mousemove', mouseMove, false);
+				document.body.addEventListener('mouseup', mouseUp, false);
+				mouseDownCallBack(null,_target,e);
+			}		
+		}
+		
+		function keyUp(e){
+			if(e.keyCode == 17){
+				clearEvent();
+				keyUpCallBack.call(null,_target,e);
+			}						
+		}
+
+		function mouseUp(e){
+			if(keyList['Ctrl'] ){
+				keyList['mouseDown'] = false;
+				console.log('移除mouseMove事件');
+				clearEvent();
+				mouseUpCallBack.call(null,_target,e);
+			}
+			
+		}
+
+		function mouseMove(e){
+			keyList['mouseMove'] = true;
+			console.log(e);
+			console.log('触发mousemove事件');
+			mouseMoveCallBack.call(null,_target,e);
+		}
+
+		function clearEvent(){
+			document.body.removeEventListener('keydown', keyDown, false);
+			document.body.removeEventListener('mousedown', mouseDown, false);
+			document.body.removeEventListener('mousemove', mouseMove, false);
+			console.log('触发mouseUp事件解除绑定的keyDown 、mouseDown、mouseMove事件');
+			console.log('rotateX %d rotateY %d translateZ %d ',rotateX,rotateY,+translateZ);
+			keyList = {};
+			document.body.addEventListener('keydown', keyDown, false);
+		}
+	}
+	
+	
+	//鼠标滚轮操作
+ 
+	/*监听滚轮*/ 
+	function addWheelEvent( obj,type,fn ) { 
+		var isFirefox = typeof document.body.style.MozUserSelect != 'undefined'; 
+		if( obj.addEventListener ) 
+		obj.addEventListener( isFirefox ? 'DOMMouseScroll' : type,fn,false ); 
+		else 
+		obj.attachEvent( 'on'+type,fn ); 
+		return fn; 
+	} 
+
+	//移除事件,这里对mousewheel做了兼容,移除时统一使用mousewheel 
+	function delWheelEvent( obj,type,fn ) { 
+		var isFirefox = typeof document.body.style.MozUserSelect != 'undefined'; 
+		if( obj.removeEventListener ) 
+		obj.removeEventListener( isFirefox ? 'DOMMouseScroll' : type,fn,false ); 
+		else 
+		obj.detachEvent( 'on'+type,fn ); 
+	} 
+
+	function getWheelValue( e ) { 
+		e = e||event; 
+		return ( e.wheelDelta ? e.wheelDelta/120 : -( e.detail%3 == 0 ? e.detail/3 : e.detail ) ) ; 
+	} 
+
+	function stopEvent(e) { 
+		e = e||event; 
+		if( e.preventDefault )e.preventDefault(); 
+		e.returnValue = false; 
+	}
+
+
+	//addWheelEvent( document.body,'mousewheel',changeStyle);
+	//delWheelEvent( document.body,'mousewheel',changeStyle);//删除滚轮事件
+
+	//滚轮事件改变  translateZ 样式
+	function changeStyle(e){
+		stopEvent( e ); 
+		var delta = getWheelValue(e); 
+		translateZ = +translateZ + delta*10;
+		trsf();
+		return false; 
+	}
+
+
+
+
+
+
+	
+	
+	
+	//添加一个
+	function add(){
+		var _a = document.createElement('a');
+		_a.className = 'h';
+		_a.style.cssText = "-webkit-transform:rotateX(0deg) rotateY(10deg) translateZ(200px);";
+		_a.innerHTML = "<span>内容1 rotateX:0 rotateY:10 translateZ:200</span>";
+		$('container').appendChild(_a);
+	}
+	
+	//添加个球
+	function addBall(){
+		document.getElementById('container').innerHTML = String(function(){/*!
+				<!--a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px);"><span> </span></a-->
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<!--a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(0deg) translateZ(200px);"><span> </span></a-->
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(0deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(0deg) translateZ(200px);"><span></span></a>
+				
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				
+				
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				
+			  
+			 
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				
+				
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				 
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(90deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-90deg) translateZ(200px);"><span></span></a>
+		*/}).replace(/^[^\{]*\{\s*\/\*!?|\*\/[;|\s]*\}$/g, '');
+	}
+
+	//添加个方块
+	function addCube(){
+		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"></a>';	
+	}
+	
+	//清除
+	function clearContainer(){
+		$('container').innerHTML = '<span></span><a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>';
+	}
+	
+	//自动转动
+	function autoRange(){
+		var autoX = $('rangexCheck').checked;
+			autoY = $('rangeyCheck').checked;
+		setTimeout(function autoRun(){
+			if(autoX || autoY){
+				autoX && (rotateX++);
+				autoY && (rotateY++);
+				trsf();
+				setTimeout(autoRange,0);
+			}
+		},0);
+	}
+	
+	
+	</script>
+  </body>
+</html>
