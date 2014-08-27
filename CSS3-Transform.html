@@ -33,6 +33,8 @@
 		left:50%;
 		transform:translate(-50%,-50%);
 	  }
+	  
+	  /* Z轴面 */
 	  .stage_area:after{
 		content: 'Z';
 		display: block;
@@ -121,9 +123,9 @@
   <div id="log"></div>
   </div>
   <!--矩阵变换好麻烦啊，还是写在style里面吧-->
-    <div id="stage_area" class="stage_area"  style="perspective: 800px;-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>舞台X:0 rotateY:0 translateZ:0</span>
-    	<div id="container" class="container"   style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>容器 rotateX:0 rotateY:0 translateZ:0</span>
-		  <a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>
+    <div id="stage_area" class="stage_area"  style="perspective: 800px;-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>舞台X:0 rotateY:0 translateZ:0</span>
+    	<div id="container" class="container"   style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>容器 rotateX:0 rotateY:0 translateZ:0</span>
+		  <a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>
     	</div>	 
     </div>
 	<script>
@@ -197,13 +199,25 @@
 			$('rangeX').value = rotateX = trsVal[0];
 			$('rangeY').value = rotateY = trsVal[1];
 			$('rangeZ').value = translateZ = trsVal[2];
+			translateY = trsVal[3];
+			translateX = trsVal[4];
 			
 			
 			//鼠标操作
 			oldX = null,oldY = null;
-			console.log(rotateX);console.log(rotateY);console.log(translateZ);
-			console.log(oldX);console.log(oldY);
+			 state = {
+				rotateX:rotateX,
+				rotateY:rotateY,
+				translateX:translateX,
+				translateY:translateY,
+				translateZ:translateZ,
+				oldX:oldX,
+				oldY:oldY
+			};
+			console.log(JSON.stringify(state));
+			
 			createMouseWorkSpace(obj,{
+			    //按住Ctrl键、鼠标左键拖动时
 				mouseMoveCallBack:function(target,e){
 					var newX = e.screenX,newY = e.screenY;
 					if( oldX && oldY){
@@ -222,12 +236,26 @@
 						oldY = newY;
 					}
 				},
+				//按住Ctrl键、鼠标右键拖动时
 				mouseRightMoveCallBack:function(target,e){
 					console.log('mouseRightMoveCallBack');
+					/*
+					//平移辅助面
+					if(!$('_clone')){
+						var _clone = target.cloneNode();
+						_clone.id="_clone";
+						_clone.style.width='100vw';
+						_clone.style.height='100vh';
+						_clone.style.left="-50vw";
+						_clone.style.top="-50vh";
+						target.parentNode.appendChild(_clone);
+					}
+					*/
+					
 					var newX = e.screenX,newY = e.screenY;
 					if( oldX && oldY){
 						translateX = (+translateX + (newX-oldX));
-						translateY = (+translateY -(+newY-oldY));
+						translateY = (+translateY +(+newY-oldY));
 						console.log('translateY'+translateY);
 						console.log(translateX);
 						oldX = newX;	 
@@ -490,7 +518,7 @@
 	function add(){
 		var _a = document.createElement('a');
 		_a.className = 'h';
-		_a.style.cssText = "-webkit-transform:rotateX(0deg) rotateY(10deg) translateZ(200px);";
+		_a.style.cssText = "-webkit-transform:rotateX(0deg) rotateY(10deg) translateZ(200px) translateX(0px) translateY(0px);";
 		_a.innerHTML = "<span>内容1 rotateX:0 rotateY:10 translateZ:200</span>";
 		$('container').appendChild(_a);
 	}
@@ -574,12 +602,12 @@
 
 	//添加个方块
 	function addCube(){
-		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"></a>';	
+		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px) translateX(0px) translateY(0px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"></a>';	
 	}
 	
 	//清除
 	function clearContainer(){
-		$('container').innerHTML = '<span></span><a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>';
+		$('container').innerHTML = '<span></span><a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px) translateX(0px) translateY(0px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>';
 	}
 	
 	//自动转动
