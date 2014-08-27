@@ -88,7 +88,7 @@
     </style>
     
   </head>
-  <body>
+  <body oncontextmenu="return false;">
   <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:red;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
   <div class="help">
   <pre>
@@ -178,8 +178,8 @@
 		var cls = e.target.className;
 		var clsStr = {'stage_area':'舞台','container':'容器','h':'内容'};
 		if('stage_area container h v'.indexOf(cls) > -1 && cls!=''){
-		 
-	        obj && delWheelEvent( document,'mousewheel',changeStyle);//删除滚轮事件
+		    
+	        obj && delWheelEvent( document,'mousewheel',changeStyle) && (obj.style.border="none");//删除滚轮事件
 			obj = e.target;
 			addWheelEvent( document,'mousewheel',changeStyle);//绑定滚轮事件
 			objName = clsStr[cls];
@@ -221,7 +221,8 @@
 						oldX = newX;	 
 						oldY = newY;
 					}
-				},mouseRightMoveCallBack:function(target,e){
+				},
+				mouseRightMoveCallBack:function(target,e){
 					console.log('mouseRightMoveCallBack');
 					var newX = e.screenX,newY = e.screenY;
 					if( oldX && oldY){
@@ -352,7 +353,7 @@
 		var ctrlKeyDownCallBack = opts.ctrlKeyDownCallBack || function(){};
 		var keyUpCallBack = opts.keyUpCallBack || function(){};
 		var mouseDownCallBack = opts.mouseDownCallBack || function(){};
-		var mouseUpCallBack = opts.mouseUpCallBack || function(){};
+		var mouseUpCallBack = opts.mouseUpCallBack || function(e){stopEvent(e);};
 		var mouseMoveCallBack = opts.mouseMoveCallBack || function(target,e){};
 		var mouseRightMoveCallBack = opts.mouseRightMoveCallBack || function(target,e){};
 		
@@ -407,11 +408,11 @@
 			console.log(e.which);
 			switch(e.which){
 				case 3:
-					console.log('右键');
+					console.log('按住鼠标右键move');
 					mouseRightMoveCallBack.call(null,_target,e);	
 				break;
 				case 1:
-					console.log('左键');
+					console.log('按住鼠标左键move');
 					console.log('触发mousemove事件');
 					mouseMoveCallBack.call(null,_target,e);					
 				break;
