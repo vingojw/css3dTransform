@@ -12,14 +12,30 @@
 		overflow:hidden;
 		font-size:12px;
 	  }
+	  .clearfix:after,.clearfix:before{
+		content:'';
+		display:table;
+	  }
+	  .clearfix:after{
+		clear:both;
+	  }
+	  
       /*舞台*/
       .stage_area{
-        transform-style: preserve-3d;
-        position:relative;
-        height:100vh;
-        width:100vw;
-		background:rgba(164, 219, 201, 0.3);
+		transform-style: preserve-3d;
+		position: relative;
+		height: 100vh;
+		padding-top: 30px;
+		width: 100vw;
+		padding-left: 25%;
+		background: rgba(164, 219, 201, 0.3);
       }
+	  
+	  .stage_area .bgspan{
+		text-align: right;
+		display: block;
+		padding-right: 38px;
+	  }
 	  
 	  .stage_area:before,.container:before,.h:before{
 	    content:'';
@@ -27,7 +43,7 @@
 		width:6px;
 		height:6px;
 		position:absolute;
-		background:red;
+		background:#6AA961;
 		border-radius:50%;
 		top:50%;
 		left:50%;
@@ -58,72 +74,136 @@
         transform-style: preserve-3d;
         width:200px;
         height:200px;
-        background:rgba(200, 255, 0, 0.3);
+        background:rgba(57, 184, 248,.7);
         position:absolute;
         top:50%;
         left:50%;
         margin-left:-100px;margin-top:-100px;
       }
-
 	  
       .container a{
-	 
 		transform-style: preserve-3d;
         width:50px;height:50px;
         display:block;
         width:100px;height:100px;
         position:absolute;
-        background:rgba(240,0,0,0.3);
+        background:rgba(231, 201, 47,.7);
+		color:#000;
         top:50%;
         left:50%;
         margin-left:-50px;
         margin-top:-50px;
       }
 	  
-	  
+	  .stage_area:target,.container:target, .h:target{
+		opacity:.7;
+	  }
 	  
 	  
 	.container ,.stage_area,pre,#log{-webkit-user-select: none;}
-	.help{overflow:hidden;width: 40%;top: 150px;position:absolute;z-index:2;top:60px;padding:10px;}
-	 pre{float:left;margin-right: 20px;font-size:20px;padding-bottom: 137px;}
+	.help{overflow:hidden;top: 150px;position:absolute;z-index:2;top:60px;padding:10px;}
+	.help > div{
+		margin: 10px;
+	}
+	input{vertical-align: middle;}
+	 pre{float:left;margin-right: 20px;padding-bottom: 137px;}
 	 .btn{width: 45%;height: 40px;margin: 10px 0;}
+	 .nav{
+		background-color: #f9f9f9;
+		border-bottom: 1px solid #e5e5e5;
+		color: #666;
+		height: 30px;
+		line-height: 30px;
+		position:fixed;
+		top:0;
+		z-index: 1;
+		width:100%;
+	 }
+	 .nav-container{
+		width:960px;
+		margin:0 auto;
+	 }
+	 a{
+		color: #666;
+		text-decoration: none;
+	 }
+	   
+	 .nav-container a{
+		display:block;
+		padding: 0 20px;
+		float:left;
+	 }
+	 .nav-container a:hover{
+		color:#e9380e;
+	 }
     </style>
     
   </head>
-  <body oncontextmenu="return false;">
-  <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:red;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
+  <body oncontextmenu="return true;">
+  <div class="nav">
+	<div class="nav-container">
+		<a href="#" class="piece" onclick="add();">+方块</a><a href="#" class="cube" onclick="addCube();">+正方体</a><a href="#" class="ball" onclick="addBall();">+球</a><a href="#" class="del" onclick="clearContainer();">初始化</a><span>键盘事件: 上(w)  下(s)  左(a)  右(d)  透视-(q)  透视+(e) </span> 
+	</div>
+  </div>
+  <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:#39B8F8;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
   <div class="help">
-  <pre>
   
-点击选中需要改变的DIV
-
-键盘事件:
-	w:左转
-	s:右转
-	a:上转
-	d:下转
-	q:透视-
-	e:透视+
-	
-按住Ctrl键时：
-鼠标拖动修改位置
-鼠标滚轮可修改层级
-
-  </pre>
+<div>按住Ctrl键  鼠标右键拖动  rotate X、Y变换</div>
+<div>            左键拖动 translate X、Y变换</div>
+<div>鼠标滚轮   translate Z </div>
+  
   <div>X轴旋转:<input type="range" name="range" id="rangeX" min="0" step="10" max="360" value="0" /><label for='rangexCheck'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangexCheck" type='checkbox' /><button onclick="rotateX=0;trsf();">重置</button></div>
-  <div>Y轴旋转:<input type="range" name="range" id="rangeY" min="0" step="10" max="360" value="0" /><label for='rangeyCheck'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangeyCheck" type='checkbox' /><button onclick="rotateY=0;trsf();">重置</button></div>
-  <div>Z轴位移:<input type="range" name="range" id="rangeZ" min="-800" max="800" step="10" value="200" /></div>
+  <div>Y轴旋转:<input type="range" name="range" id="rangeY" min="0" step="10" max="360" value="0" /><label for='rangeyCheck1'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangeyCheck1" type='checkbox' /><button onclick="rotateY=0;trsf();">重置</button></div>
+  <div>Z轴位移:<input type="range" name="range" id="rangeZ" min="-800" max="800" step="10" value="200" /><button onclick="translateZ=0;trsf();">重置</button></div>
+ 
   <!--div>舞台透视:<input type="range" name="range" id="perspective" min="0" max="800" step="10" value="800" /></div-->
-  <button onclick="add();" class="btn">加一个</button>
-  <button onclick="addBall();" class="btn">加个球</button>
-  <button onclick="addCube();" class="btn">加个正方体</button>
-  
-  <button onclick="clearContainer();" class="btn">清空</button>
-  
+ 
   <div id="log"></div>
+  <div>结构
+  <textarea id="htmlResult">
+  
+  
+  </textarea></div>
+  <div>样式
+  <textarea id="cssResult">
+.stage_area{
+	transform-style: preserve-3d;
+	position: relative;
+	height: 100vh;
+	padding-top: 30px;
+	width: 100vw;
+	background: rgba(164, 219, 201, 0.3);
+}
+.container{
+	font-size:9px;
+	transform-style: preserve-3d;
+	width:200px;
+	height:200px;
+	background:rgba(57, 184, 248,.7);
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin-left:-100px;margin-top:-100px;
+}
+
+.container a{
+	transform-style: preserve-3d;
+	width:50px;height:50px;
+	display:block;
+	width:100px;height:100px;
+	position:absolute;
+	background:rgba(231, 201, 47,.7);
+	color:#000;
+	top:50%;
+	left:50%;
+	margin-left:-50px;
+	margin-top:-50px;
+}
+  </textarea>
+  </div>
   </div>
   <!--矩阵变换好麻烦啊，还是写在style里面吧-->
-    <div id="stage_area" class="stage_area"  style="perspective: 800px;-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>舞台X:0 rotateY:0 translateZ:0</span>
+    <div id="stage_area" class="stage_area"  style="perspective: 800px;-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span class="bgspan">舞台X:0 rotateY:0 translateZ:0</span>
     	<div id="container" class="container"   style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>容器 rotateX:0 rotateY:0 translateZ:0</span>
 		  <a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(0px) translateX(0px) translateY(0px);"><span>内容1 rotateX:0 rotateY:10 translateZ:200</span></a>
     	</div>	 
@@ -161,10 +241,12 @@
 	
 	//变形
 	function trsf(o){
-		obj.style.webkitTransform  = 'rotateX('+rotateX+'deg) rotateY('+rotateY+'deg) translateZ('+translateZ+'px) translateY('+translateY+'px) translateX('+translateX+'px)';
-
-		obj.getElementsByTagName('span')[0].innerHTML = 'rotateX('+ rotateX +'deg) rotateY('+ rotateY +'deg) translateZ('+ translateZ +'px)';
-		$("log").innerHTML = '你选择的是'+ objName +'<br/>'+'rotateX('+rotateX+'deg)<br/> rotateY('+rotateY+'deg)<br/> translateZ('+translateZ+'px)';
+	   var style = 'rotateX('+rotateX+'deg) rotateY('+rotateY+'deg) translateZ('+translateZ+'px) translateY('+translateY+'px) translateX('+translateX+'px)';
+		obj.style.webkitTransform  = style
+		obj.getElementsByTagName('span')[0].innerHTML = style;
+		//$("log").innerHTML = '你选择的是'+ objName +'<br/>'+'rotateX('+rotateX+'deg)<br/> rotateY('+rotateY+'deg)<br/> translateX('+translateX+'px<br/> translateY('+translateY+'px <br/> translateZ('+translateZ+'px)';
+		
+		$('htmlResult').value = $('stage_area').outerHTML;
 		if(o){
 			console.log(o.value);
 			console.log(o.max);
@@ -184,8 +266,8 @@
 	        obj && delWheelEvent( document,'mousewheel',changeStyle) && (obj.style.border="none");//删除滚轮事件
 			obj = e.target;
 			addWheelEvent( document,'mousewheel',changeStyle);//绑定滚轮事件
-			objName = clsStr[cls];
-			$('log').innerHTML = '你选择的是'+objName;
+			objName = clsStr[cls] || '内容';
+			$('log').innerHTML = '你选择的是'+ objName;
 			$('rangeX').focus();
 			
 			for(var i in clsStr){
@@ -526,83 +608,83 @@
 	//添加个球
 	function addBall(){
 		document.getElementById('container').innerHTML = String(function(){/*!
-				<!--a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px);"><span> </span></a-->
-				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<!--a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(0deg) translateZ(200px);"><span> </span></a-->
-				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(0deg) translateZ(200px);"><span> </span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(0deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(0deg) translateZ(200px);"><span></span></a>
+				<!--a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ; translateX(0) translateY(0) ; translateX(0) translateY(0) ; translateX(0) translateY(0) ; translateX(0) translateY(0) ; ;"><span> </span></a-->
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<!--a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a-->
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span> </span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(0deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
 				
-				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(30deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
 				
 				
-				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(60deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
 				
 			  
 			 
-				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-30deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(330deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
 				
 				
-				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-60deg) translateZ(200px);"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(0deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(30deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(60deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(90deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(120deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(150deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(180deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(210deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(240deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(270deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(300deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(300deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
 				 
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(90deg) translateZ(200px);"><span></span></a>
-				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-90deg) translateZ(200px);"><span></span></a>
-		*/}).replace(/^[^\{]*\{\s*\/\*!?|\*\/[;|\s]*\}$/g, '');
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(90deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+				<a id="h" class="h"  style="-webkit-transform:rotateX(330deg) rotateY(-90deg)  translateZ(200px) translateX(0) translateY(0) ;"><span></span></a>
+	*/}).replace(/^[^\{]*\{\s*\/\*!?|\*\/[;|\s]*\}$/g, '');
 	}
 
 	//添加个方块
 	function addCube(){
-		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px) translateX(0px) translateY(0px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px); border: 1px solid black;"></a>';	
+		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px) translateX(0px) translateY(0px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"></a>';	
 	}
 	
 	//清除
@@ -613,11 +695,12 @@
 	//自动转动
 	function autoRange(){
 		var autoX = $('rangexCheck').checked;
-			autoY = $('rangeyCheck').checked;
+			autoY = $('rangeyCheck1').checked;
 		setTimeout(function autoRun(){
-			if(autoX || autoY){
+			if(autoX || autoY  ){
 				autoX && (rotateX++);
 				autoY && (rotateY++);
+				//translateZ && (translateZ++);
 				trsf();
 				setTimeout(autoRange,0);
 			}
