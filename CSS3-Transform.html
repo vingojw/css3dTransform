@@ -147,10 +147,10 @@
   </div>
   <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:#39B8F8;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
   <div class="help">
-  
-<div>按住Ctrl键  鼠标右键拖动  rotate X、Y变换</div>
-<div>            左键拖动 translate X、Y变换</div>
-<div>鼠标滚轮   translate Z </div>
+<div>1、鼠标点击选中</div>  
+<div>2、按住Ctrl键 鼠标左键拖动 rotate X、Y  变换</div>
+<div>3、按住Ctrl键 鼠标右键拖动 translate X、Y变换</div>
+<div>4、鼠标滚轮  操作 translate Z </div>
   
   <div>X轴旋转:<input type="range" name="range" id="rangeX" min="0" step="10" max="360" value="0" /><label for='rangexCheck'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangexCheck" type='checkbox' /><button onclick="rotateX=0;trsf();">重置</button></div>
   <div>Y轴旋转:<input type="range" name="range" id="rangeY" min="0" step="10" max="360" value="0" /><label for='rangeyCheck1'> 自动</label><input class='autoRange' onclick="autoRange();" id="rangeyCheck1" type='checkbox' /><button onclick="rotateY=0;trsf();">重置</button></div>
@@ -169,12 +169,11 @@
 .stage_area{
 	transform-style: preserve-3d;
 	position: relative;
-	height: 100vh;
-	padding-top: 30px;
-	width: 100vw;
+	height: 100%;
+	width: 100%;
 	background: rgba(164, 219, 201, 0.3);
 }
-.container{
+.stage_area .container{
 	font-size:9px;
 	transform-style: preserve-3d;
 	width:200px;
@@ -183,17 +182,18 @@
 	position:absolute;
 	top:50%;
 	left:50%;
-	margin-left:-100px;margin-top:-100px;
+	margin-left:-100px;
+	margin-top:-100px;
 }
 
-.container a{
+.stage_area .container a{
 	transform-style: preserve-3d;
-	width:50px;height:50px;
 	display:block;
 	width:100px;height:100px;
 	position:absolute;
 	background:rgba(231, 201, 47,.7);
 	color:#000;
+	width:50px;height:50px;
 	top:50%;
 	left:50%;
 	margin-left:-50px;
