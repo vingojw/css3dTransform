@@ -136,13 +136,40 @@
 	 .nav-container a:hover{
 		color:#e9380e;
 	 }
+	 
+	 
+	 /*六边形*/
+	.container a.hex{
+		width:100%;height:58%;
+		top:21%;
+		position:absolute;
+		background:#3AB32A;
+		transform-style: preserve-3d;
+		opacity:.7;
+	}
+	.hex:after,.hex:before{
+		position: absolute;
+		content: "";
+		width: 100%;
+		height: 100%;
+		left: 0;
+		top: 0;
+		background:#3AB32A;
+	}
+	.hex:after{
+		-webkit-transform: rotateZ(60deg);
+	}
+	.hex:before{
+		-webkit-transform: rotateZ(120deg); 
+	}
+	 
     </style>
     
   </head>
   <body oncontextmenu="return true;">
   <div class="nav">
 	<div class="nav-container">
-		<a href="#" class="piece" onclick="add();">+方块</a><a href="#" class="cube" onclick="addCube();">+正方体</a><a href="#" class="ball" onclick="addBall();">+球</a><a href="#" class="del" onclick="clearContainer();">初始化</a><span>键盘事件: 上(w)  下(s)  左(a)  右(d)  透视-(q)  透视+(e) </span> 
+		<a href="#" class="piece" onclick="add();">+方块</a><a href="#" class="cube" onclick="addCube();">+正方体</a><a href="#" class="cube" onclick="addHex();">+六边形</a><a href="#" class="ball" onclick="addBall();">+球</a><a href="#" class="del" onclick="clearContainer();">初始化</a><span>键盘事件: 上(w)  下(s)  左(a)  右(d)  透视-(q)  透视+(e) </span> 
 	</div>
   </div>
   <div style="display:block;width:6px;height:6px;position:absolute;	border:3px solid #f60;background:#39B8F8;	border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)";></div>
@@ -261,7 +288,7 @@
 	document.body.addEventListener('mousedown',function(e){
 		var cls = e.target.className;
 		var clsStr = {'stage_area':'舞台','container':'容器','h':'内容'};
-		if('stage_area container h v'.indexOf(cls) > -1 && cls!=''){
+		if('stage_area container h hex v '.indexOf(cls) > -1 && cls!=''){
 		    
 	        obj && delWheelEvent( document,'mousewheel',changeStyle) && (obj.style.border="none");//删除滚轮事件
 			obj = e.target;
@@ -682,9 +709,18 @@
 	*/}).replace(/^[^\{]*\{\s*\/\*!?|\*\/[;|\s]*\}$/g, '');
 	}
 
-	//添加个方块
+	//添加个正方体
 	function addCube(){
 		$('container').innerHTML='<span></span><a id="h" class="h" style="-webkit-transform: rotateX(360deg) rotateY(90deg) translateZ(50px) translateX(0px) translateY(0px); border: none;"> </a><a class="h" style="-webkit-transform: rotateX(360deg) rotateY(270deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(180deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(0deg) rotateY(0deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(90deg) rotateY(360deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"> </a><a class="h" style="-webkit-transform: rotateX(-90deg) rotateY(360deg) translateZ(50px) translateX(0) translateY(0); border: 1px solid black;"></a>';	
+	}
+	
+	//添加个6边形
+	function addHex(){
+			var _a = document.createElement('a');
+			_a.className = 'hex';
+			_a.style.cssText = "-webkit-transform:rotateX(0deg) rotateY(0deg) translateZ(200px) translateX(0px) translateY(0px);";
+			_a.innerHTML = "<span style='position:absolute;top:0;left:0;z-index: 1;'></span>";
+			$('container').appendChild(_a);
 	}
 	
 	//清除
