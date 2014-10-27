@@ -166,7 +166,7 @@
     </style>
     
   </head>
-  <body oncontextmenu="return true;">
+  <body>
   <div class="nav">
 	<div class="nav-container">
 		<a href="#" class="piece" onclick="add();">+方块</a><a href="#" class="cube" onclick="addCube();">+正方体</a><a href="#" class="cube" onclick="addHex();">+六边形</a><a href="#" class="ball" onclick="addBall();">+球</a><a href="#" class="del" onclick="clearContainer();">初始化</a><span>键盘事件: 上(w)  下(s)  左(a)  右(d)  透视-(q)  透视+(e) </span> 
@@ -505,6 +505,8 @@
 					return;
 				} else {
 					keyList['Ctrl'] = true;
+					console.log('按下Ctrl屏蔽鼠标右键');
+					document.body.oncontextmenu = function(){return false;};
 					console.log('按下Ctrl绑定mousedown事件');
 					document.body.addEventListener('mousedown', mouseDown, false);
 					document.body.addEventListener('keyup', keyUp, false);
